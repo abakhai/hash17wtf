@@ -1,7 +1,4 @@
-#must just use C here istead of nCaches
-nCaches = len(caches)
-#print the number of caches
-print (nCaches)
+print (C)
 for cache in caches:
     #print cacheIndex
     print (cacheIndex, end=" ")
