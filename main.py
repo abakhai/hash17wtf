@@ -28,7 +28,7 @@ endpoints = []
 requests = []
 
 #INPUT FROM FILE
-f = open("trending_today.in", "r", encoding="ascii")
+f = open("me_at_the_zoo.in", "r", encoding="ascii")
 
 #Get data centre line
 details = [int(i) for i in f.readline().split()]
@@ -116,6 +116,8 @@ for i in range(0,len(caches)):
 final = final.replace(',','')
 final = final.replace('(','')
 final = final.replace(')','')
+final = final.replace('[','')
+final = final.replace(']','')
 final = final.replace('\n\n','\n')
 
 #OUTPUT TO FILE
