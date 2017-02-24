@@ -28,7 +28,7 @@ endpoints = []
 requests = []
 
 #INPUT FROM FILE
-f = open("me_at_the_zoo.in", "r", encoding="ascii")
+f = open("trending_today.in", "r", encoding="ascii")
 
 #Get data centre line
 details = [int(i) for i in f.readline().split()]
@@ -107,12 +107,9 @@ def distribute_videos(videos, requests, endpoints):
         i += 1
     return caches
 
-
+caches = distribute_videos(videos, requests, endpoints)
 
 #FORMAT TO VALID
-#example caches array with 5 caches and the videos they store, some store just one video, some none and some more
-caches = ((1,0),(2,3,4),(5),(),(5,4,6,3))
-
 final = str(len(caches))+"\n"+""
 for i in range(0,len(caches)):
     final = final+str(i)+" "+str(caches[i])+"\n"
@@ -122,9 +119,9 @@ final = final.replace(')','')
 final = final.replace('\n\n','\n')
 
 #OUTPUT TO FILE
-# s = open('solution.out', 'w')
-# s.write(final)
-# s.close()
+s = open('solution.out', 'w')
+s.write(final)
+s.close()
 
 
 
