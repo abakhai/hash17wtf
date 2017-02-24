@@ -62,7 +62,7 @@ for i in range(0,R):
 
 def rate_video(size, requests):
     # type of requests should be [ ( endpoint, requests) ]
-    rating = [0 for _ in range(E)]
+    rating = [0 for _ in range(V)]
     for i in range(len(requests)):
         rating[requests[i][0]] = requests[i][1] / size
     if sum(rating) > 0:
