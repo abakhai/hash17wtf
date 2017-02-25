@@ -22,29 +22,38 @@ from array import array
 #         [(0, 25), (1, 50), (2, 300)]]
 #
 
-#variables
+# variables
 cacheIndex = 0
 endpoints = []
 requests = []
+read_ratings_from_file = False
 
-#INPUT FROM FILE
-f = open("me_at_the_zoo.in", "r", encoding="ascii")
+# INPUT FROM FILE
+filename = "trending_today"
+f = open(filename + ".in", "r", encoding="ascii")
 
-#Get data centre line
+rating_file = filename + ".rtg"
+if read_ratings_from_file:
+    r = open(rating_file, "r")
+    rated_videos = eval(r.read())
+    print(rated_videos)
+
+
+# Get data centre line
 details = [int(i) for i in f.readline().split()]
 
-#Get videos line
+# Get videos line
 videos = [int(i) for i in f.readline().split()]
 
-#Allocate data centre variables
+# Allocate data centre variables
 V = details[0]
 E = details[1]
 R = details[2]
 C = details[3]
 X = details[4]
 
-#Obtain endpoints
-for x in range(0,E):
+# Obtain endpoints
+for x in range(0, E):
     endpoint = []
     a = [int(i) for i in f.readline().split()]
     endpoint.append(a[0])
@@ -56,24 +65,54 @@ for x in range(0,E):
     endpoint.append(c)
     endpoints.append(endpoint)
 
-#Obtain all requests
-for i in range(0,R):
+# Obtain all requests
+for i in range(0, R):
     requests.append([int(i) for i in f.readline().split()])
 
+
+# return available space in a cache
+def available_space(cache):
+    space = X
+    for v_id in cache:
+        space -= videos[v_id]
+    return space
+
+
+# return list of caches sorted by lowest ping
+def find_closest_caches(endpoint):
+    e = endpoint
+    if e[2]:  # can find closest cache
+        closest_caches = sorted(e[2])
+        return closest_caches
+    else:
+        return ()
+
+
+# return closest cache id, factoring in space required to allocate next video
+def find_closest_available_cache(caches, endpoint, size):
+    for cache in find_closest_caches(endpoint):
+        if available_space(caches[cache[0]]) > size:
+            return cache[0]
+        else:
+            pass
+    return ()
+
+
+# rate video in terms of size:popularity ratio for each endpoint, normalised
 def rate_video(size, requests):
     # type of requests should be [ ( endpoint, requests) ]
     rating = [0 for _ in range(V)]
     for i in range(len(requests)):
         rating[requests[i][0]] = requests[i][1] / size
-    if sum(rating) > 0:
-        norm_rating = [n / sum(rating) for n in rating]
-    else:
-        norm_rating = rating
-    return norm_rating
+    return rating
 
-def distro_weights(videos, requests):
+
+# rate the full list of videos
+def rate_videos_bulk(videos, requests):
     ratings = [[] for _ in range(len(videos))]
     for i in range(len(videos)):
+        if i % (V/5) == 0:
+            print(i, '/', V)
         # set ratings[i] to rating list based on video_id and request index
         rq_coll = []  # "request collation"
         for r in requests:
@@ -83,49 +122,68 @@ def distro_weights(videos, requests):
     # print(ratings)
     return ratings
 
-def distribute_videos(videos, requests, endpoints):
+
+def distribute_videos(videos, endpoints):
     caches = [[] for _ in range(C)]
     i = 0
     for e in endpoints:
-        if e[2]:  # can find closest cache
-            closest_cache = e[2][0]
-            for cache in e[2]:
-                # find cache closest to e
-                if cache[1] < closest_cache[1]:
-                    # found cache closer
-                    closest_cache = cache
-
-            v_index = 0
-            # print(i, closest_cache)
-            for v in distro_weights(videos, requests):
-                # if video is most beneficial to this endpoint
-                if v[i] == max(v) and v[i] > 0:
-                    caches[closest_cache[0]] += [v_index]
-                v_index += 1
+        v_index = 0
+        print(i, '/', E)
+        # print(i, closest_cache)
+        for v in rated_videos:
+            # if video is most beneficial to this endpoint
+            if v[i] == max(v) and v[i] > 0:
+                # best_cache will be closest available, considering sizes of ones which
+                # are already hosting videos
+                best_cache = find_closest_available_cache(caches, e, videos[v_index])
+                # if best_cache exists
+                if best_cache:
+                    caches[best_cache] += [v_index]
+            v_index += 1
         else:  # no caches
-            pass
+                pass
+        
         i += 1
     return caches
 
 
+def fill_space(videos, requests, endpoints):
+    pass
+
 
 #FORMAT TO VALID
 #example caches array with 5 caches and the videos they store, some store just one video, some none and some more
-caches = ((1,0),(2,3,4),(5),(),(5,4,6,3))
+# caches = ((1,0),(2,3,4),(5),(),(5,4,6,3))
+
+if not read_ratings_from_file:
+    r = open(rating_file, "w")
+    rated_videos = rate_videos_bulk(videos, requests)
+    r.write(str(rated_videos))
+    r.close()
+
+caches = distribute_videos(videos, endpoints)
 
 final = str(len(caches))+"\n"+""
 for i in range(0,len(caches)):
     final = final+str(i)+" "+str(caches[i])+"\n"
 final = final.replace(',','')
-final = final.replace('(','')
-final = final.replace(')','')
+final = final.replace('[','')
+final = final.replace(']','')
 final = final.replace('\n\n','\n')
 
+
+
+# myE = 0
+# print(endpoints[myE])
+# print(find_closest_caches(endpoints[myE]))
+
+##print(videos)
+##
+##print(X)
+##
+# distribute_videos(videos, requests, endpoints)
+
 #OUTPUT TO FILE
-# s = open('solution.out', 'w')
-# s.write(final)
-# s.close()
-
-
-
-
+s = open(filename + ".out", 'w')
+s.write(final)
+s.close()
