@@ -163,6 +163,7 @@ if not read_ratings_from_file:
 
 caches = distribute_videos(videos, endpoints)
 
+
 final = str(len(caches))+"\n"+""
 for i in range(0,len(caches)):
     final = final+str(i)+" "+str(caches[i])+"\n"
@@ -171,7 +172,10 @@ final = final.replace('[','')
 final = final.replace(']','')
 final = final.replace('\n\n','\n')
 
-
+#OUTPUT TO FILE
+s = open('solution.out', 'w')
+s.write(final)
+s.close()
 
 # myE = 0
 # print(endpoints[myE])
